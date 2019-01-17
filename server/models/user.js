@@ -61,10 +61,9 @@ UserSchema.statics.findByToken = function (token) {
     catch {
 
     }
-    user.findOne({
-        _id:decod._id,
-        'tokens.access':'auth'}).then(ur=>{
-            return ue
+    return user.find({
+        'tokens.access':'auth'}).then((ur)=>{
+            return ur
         })
 }
 
