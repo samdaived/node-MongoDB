@@ -54,17 +54,17 @@ UserSchema.methods.toJSON = function (){
 
 UserSchema.statics.findByToken = function (token) {
     var user = this;
-    var decod;
+    var decoded;
     try{
-        decod = jwt.verify(token,'123')
+        decoded = jwt.verify(token,'123')
     }
     catch {
-
+        return Promise.reject()
     }
-    return user.find({
-        'tokens.access':'auth'}).then((ur)=>{
-            return ur
-        })
+    return user.findOne({
+        '_id':decoded._id,
+        'tokens.auth':token,
+        'tokens.access':'auth'})
 }
 
 

@@ -7,6 +7,7 @@ const {ObjectID} =require('mongodb');
 
 const {User}= require('./models/user');
 const {todo}= require('./models/todo');
+const {authenticated} = require('./middleware/authentication');
 
 const app = express();
 app.use(bodyParser.json());
@@ -94,13 +95,12 @@ app.post('/users',(req,res)=>{
         })
     .catch(e=> res.status(400).send(e))
     });
+
+
     
-app.get('/users/me',(req,res)=>{
-    let token = req.header('x-auth');
-    User.findByToken(token).then((user)=>{
-        return res.send(user)
-    })
-})
+app.get('/users/me',authenticated,(req,res)=>{
+    res.send(req.user)
+});
 
 app.listen(3000,()=>{
     console.log("port 3000");
