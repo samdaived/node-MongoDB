@@ -3,25 +3,11 @@ const request = require('supertest');
 const {ObjectID}=require('mongodb');
 const {app} = require('../server');
 const {todo}=require('../models/todo');
+const {User}=require('../models/user');
+const {todopopulated,initialToDoData,userpopulated,initialUserData} = require('./seed/seed');
 
-var initialData = [
-    {text:'trying',
-    _id:new ObjectID(),
-    complated:false,
-    complatedAt:null}
-    ,
-    {text:'trying aging',
-    _id:new ObjectID(),
-    complated:true,
-    complatedAt:234
-    }
-];
-
-beforeEach(done=>{
-    todo.remove({}).then(()=>{
-       return todo.insertMany(initialData)
-    }).then(res=> done())
-});
+beforeEach(userpopulated);
+beforeEach(todopopulated);
 
 
 describe("Post /todo", ()=>{
@@ -76,10 +62,10 @@ describe('Get /todo', ()=>{
 describe("Get /todo/:id",()=>{
     it("should accept valid id and return json of the Id",(done)=>{
         request(app)
-        .get(`/todo/${initialData[0]._id.toHexString()}`)
+        .get(`/todo/${initialToDoData[0]._id.toHexString()}`)
         .expect(200)
         .expect(res=>{
-            expect(res.body.re.text).toBe(initialData[0].text)
+            expect(res.body.re.text).toBe(initialToDoData[0].text)
         })
         .end(done)
     });
@@ -99,7 +85,7 @@ describe("Get /todo/:id",()=>{
 
 describe("Delet /todo/:id",()=>{
     it("should accept valid Id and delet the object",(done)=>{
-        var hexid=initialData[0]._id.toHexString();
+        var hexid=initialToDoData[0]._id.toHexString();
         request(app)
         .delete(`/todo/${hexid}`)
         .expect(200)
@@ -135,7 +121,7 @@ describe("Delet /todo/:id",()=>{
 describe("Patch /todo",()=>{
     it("should update valid data",done=>{
         request(app)
-        .patch(`/todo/${initialData[0]._id.toHexString()}`)
+        .patch(`/todo/${initialToDoData[0]._id.toHexString()}`)
         .send({
             complated:true,
             text:"hell work"
@@ -164,6 +150,63 @@ describe("Patch /todo",()=>{
         request(app)
         .patch('/todo/545')
         .expect(404)
+        .end(done)
+    })
+});
+
+describe("/post users",()=>{
+    const email='sasasa@dsddd.com';
+    const password='fdgdffdg233';
+    it('shuold save the the new user',(done)=>{
+       
+        request(app)
+        .post('/users')
+        .send({email,password})
+        .expect(200)
+        .expect((res)=>{
+            expect(res.headers["x-auth"]).toBeTruthy();
+            expect(res.body._id).toBeTruthy();
+            expect(res.body.email).toBe(email);
+            expect(res.body.password).not.toBe(password);
+            
+        })
+        .end((er)=>{
+            if(er){
+               return done(er)
+            }
+            User.findOne({email}).then(re=>{
+                expect(re.email).toBe(email);
+                done()
+            })
+        })
+    });
+    it('should"nt save invalid email',(done)=>{
+        request(app)
+        .post('/users')
+        .send({email:initialUserData[0].email,password:initialUserData[0].password})
+        .expect(400)
+        .end(done)
+
+    } )
+});
+
+describe('/get users/me',()=>{
+    it('should get back the users data',(done)=>{
+        request(app)
+        .get('/users/me')
+        .set('x-auth',initialUserData[0].tokens[0].auth)
+        .expect(200)
+        .expect(user=>{ 
+            expect(user.body._id).toBe(initialUserData[0]._id.toHexString())
+        })
+        .end(done)
+    });
+    it('should"nt stop invalid token',(done)=>{
+        request(app)
+        .get('/users/me')
+        .set('x-auth',"fdgdfgdfgdfg")
+        .expect(401)
+        
         .end(done)
     })
 })
