@@ -112,6 +112,13 @@ app.post('/users/login',(req,res)=>{
         
     }).catch(er=>res.status(401).send(er)
     )
+});
+
+app.post('/users/me/token',authenticated,(req,res)=>{
+    req.user.removeToken(req.token)
+    .then(re=>{
+        res.status(200).send("done")
+    }).catch(er=>res.status(400).send(er))
 })
    
 

@@ -87,7 +87,19 @@ UserSchema.statics.findByCredentials = function (email,password) {
         })
     })
 
-}
+};
+
+UserSchema.methods.removeToken= function(token){
+    const user4 = this;
+   return user4.update({
+        $pull:{
+            tokens:{
+                auth:token
+
+            }
+        }
+    })
+};
 
 UserSchema.pre('save', function (next){
     let user=this;
