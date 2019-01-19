@@ -154,9 +154,11 @@ describe("Patch /todo",()=>{
     })
 });
 
+const email='sasasa@dsddd.com';
+const password='fdgdffdg233';
+
 describe("/post users",()=>{
-    const email='sasasa@dsddd.com';
-    const password='fdgdffdg233';
+   
     it('shuold save the the new user',(done)=>{
        
         request(app)
@@ -208,4 +210,27 @@ describe('/get users/me',()=>{
         .expect(401)
         .end(done)
     })
+});
+
+
+describe('Post /users/login log in',()=>{
+    it('should accept exist users',(done)=>{
+        request(app)
+        .post('/users/login')
+        .send({email:initialUserData[0].email,password:initialUserData[0].password})
+        .expect(200)
+        .expect((us)=>{
+            expect(us.headers['x-auth']).toBeTruthy()
+        })
+        .end((er,re)=>{
+        if(er){ return done(er) }
+        done()})
+    });
+    it('should"nt accept invalid users',(done)=>{
+        request(app)
+        .post('/users/login')
+        .send({email:initialUserData[0].email,password:initialUserData[0].password+43})
+        .expect(401)
+        
+        .end(done)})
 })
