@@ -87,7 +87,7 @@ app.post('/users',(req,res)=>{
     const NewUser= new User(UserData);
     NewUser.save()
     .then(()=>{
-       return NewUser.generateAuthToken();})
+       return NewUser.generateAuthToken()})
     .then((a)=>{
             
             res.header("x-auth",a).send(NewUser)
@@ -100,6 +100,21 @@ app.post('/users',(req,res)=>{
 app.get('/users/me',authenticated,(req,res)=>{
     res.send(req.user)
 });
+
+app.post('/users/login',(req,res)=>{
+    const body = _.pick(req.body,['email','password']);
+    User.findByCredentials(body.email,body.password).then(user=>{
+        user.generateAuthToken().then(a=>{
+            res.header('x-auth',a).send(user)
+        }
+
+        )
+        
+    }).catch(er=>res.status(400).send(er)
+    )
+})
+   
+
 
 app.listen(3000,()=>{
     console.log("port 3000");

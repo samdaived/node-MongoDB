@@ -206,7 +206,6 @@ describe('/get users/me',()=>{
         .get('/users/me')
         .set('x-auth',"fdgdfgdfgdfg")
         .expect(401)
-        
         .end(done)
     })
 })
