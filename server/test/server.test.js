@@ -233,4 +233,21 @@ describe('Post /users/login log in',()=>{
         .expect(401)
         
         .end(done)})
+});
+
+describe('Post /users/me/token',()=>{
+    it("should delete tokens",(done)=>{
+
+        request(app)
+        .post('/users/me/token')
+        .set('x-auth',initialUserData[0].tokens[0].auth)
+        .expect(200)
+        .end((er,re)=>{
+            if(er){return done(er)}
+            User.findOne({_id:initialUserData[0]._id}).then(user=>{
+                expect(user.tokens.length).toBe(0);
+                done()
+            })
+        })
+    })
 })
