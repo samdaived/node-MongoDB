@@ -15,6 +15,7 @@ describe("Post /todo", ()=>{
         const text="I will do it";
     request(app)
     .post('/todo')
+    .set('x-auth',initialUserData[0].tokens[0].auth)
     .send({text})
     .expect(200)
     .expect((res=>{ 
@@ -32,6 +33,7 @@ describe("Post /todo", ()=>{
         
         request(app)
         .post('/todo')
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .send({})
         .expect(400)
         .end((er,res)=>{
@@ -47,9 +49,10 @@ describe('Get /todo', ()=>{
         
         request(app)
         .get('/todo')
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .expect(200)
         .expect(res=>{
-                todo.find({}).then(re=>{expect(re.length).toBe(2)
+                todo.find({_creator:initialUserData[0]._id}).then(re=>{expect(re.length).toBe(1)
                 });
                      
         })
@@ -63,6 +66,7 @@ describe("Get /todo/:id",()=>{
     it("should accept valid id and return json of the Id",(done)=>{
         request(app)
         .get(`/todo/${initialToDoData[0]._id.toHexString()}`)
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .expect(200)
         .expect(res=>{
             expect(res.body.re.text).toBe(initialToDoData[0].text)
@@ -72,12 +76,14 @@ describe("Get /todo/:id",()=>{
     it("Should reject the invalid data",(done)=>{
         request(app)
         .get('/todo/343')
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .expect(400)
         .end(done)
     });
     it("Should reject the unfound data",(done)=>{
         request(app)
         .get(`/todo/${new ObjectID()} `)
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .expect(404)
         .end(done)
     })
@@ -88,6 +94,7 @@ describe("Delet /todo/:id",()=>{
         var hexid=initialToDoData[0]._id.toHexString();
         request(app)
         .delete(`/todo/${hexid}`)
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .expect(200)
         .expect(res=>{
             expect(res.body._id).toBe(hexid);
@@ -107,12 +114,14 @@ describe("Delet /todo/:id",()=>{
     it("should  return 404 if Id is not found",(done)=>{
         request(app)
         .delete(`/todo/${new ObjectID()}`)
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .expect(404)
         .end(done)
     });
     it("should  return 400 if Id is not valid",(done)=>{
         request(app)
         .delete(`/todo/123`)
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .expect(400)
         .end(done)
     })
@@ -122,6 +131,7 @@ describe("Patch /todo",()=>{
     it("should update valid data",done=>{
         request(app)
         .patch(`/todo/${initialToDoData[0]._id.toHexString()}`)
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .send({
             complated:true,
             text:"hell work"
@@ -139,6 +149,7 @@ describe("Patch /todo",()=>{
     it("shouldnt update if not found",(done)=>{
         request(app)
         .patch(`/todo/${new ObjectID()}`)
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .send({
             complated:true,
             text:"hell work"
@@ -149,6 +160,7 @@ describe("Patch /todo",()=>{
     it("shouldnt update invalid data",(done)=>{
         request(app)
         .patch('/todo/545')
+        .set('x-auth',initialUserData[0].tokens[0].auth)
         .expect(404)
         .end(done)
     })
@@ -242,7 +254,7 @@ describe('Post /users/me/token',()=>{
         .post('/users/me/token')
         .set('x-auth',initialUserData[0].tokens[0].auth)
         .expect(200)
-        .end((er,re)=>{
+        .end((er,re)=>{   
             if(er){return done(er)}
             User.findOne({_id:initialUserData[0]._id}).then(user=>{
                 expect(user.tokens.length).toBe(0);

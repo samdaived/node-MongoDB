@@ -13,13 +13,13 @@ const app = express();
 app.use(bodyParser.json());
 
 
-app.post('/todo',(req,res)=>{
-    const newtodo= new todo({text:req.body.text});
+app.post('/todo',authenticated,(req,res)=>{
+    const newtodo= new todo({text:req.body.text,_creator:req.user._id});
     newtodo.save().then(doc=>res.status(200).send(doc)).catch(e=>res.status(400).send(e))
 });
 
-app.get('/todo',(req,res)=>{
-    todo.find({}).then(doc=>{
+app.get('/todo',authenticated,(req,res)=>{
+    todo.find({_creator:req.user._id}).then(doc=>{
         if(doc.length===0){
             return res.status(404).send()
         }
@@ -27,13 +27,16 @@ app.get('/todo',(req,res)=>{
     }).catch(er=>res.status(400).send(er))
 });
 
-app.get('/todo/:id',(req,res)=>{
+app.get('/todo/:id',authenticated,(req,res)=>{
     var id = req.params.id;
 
     if(!ObjectID.isValid(id)){
         return res.status(400).send()
     }
-    todo.findById(id).then(re=>{
+    todo.findById({
+        _id:id,
+        _creator:req.user._id
+    }).then(re=>{
         if(!re){
             res.status(404).send()
         }
@@ -43,14 +46,17 @@ app.get('/todo/:id',(req,res)=>{
 
 });
 
-app.delete('/todo/:id',(req,res)=>{
+app.delete('/todo/:id',authenticated,(req,res)=>{
 var id = req.params.id;
 
 if(!ObjectID.isValid(id)){
     return res.status(400).send();
 }
 
-todo.findByIdAndRemove(id).then(re=>{
+todo.findByIdAndRemove({
+    _id:id,
+    _creator:req.user._id
+}).then(re=>{
     if(!re){return res.status(404).send()}
     res.status(200).send(re)
 }).catch(er=>{res.status(400).send(er)
@@ -59,7 +65,7 @@ todo.findByIdAndRemove(id).then(re=>{
 
 });
 
-app.patch('/todo/:id',(req,res)=>{
+app.patch('/todo/:id',authenticated,(req,res)=>{
     const Id=req.params.id;
     const body=_.pick(req.body,['text','complated']);
 
@@ -74,7 +80,7 @@ app.patch('/todo/:id',(req,res)=>{
         body.complated=false;
         body.complatedAt=null
     }
-    todo.findByIdAndUpdate(Id,{$set:body},{new:true}).then(re=>{
+    todo.findByIdAndUpdate({_id:Id,_creator:req.user._id},{$set:body},{new:true}).then(re=>{
         if(!re){ return res.status(404).send()}
         res.status(200).send(re)
     }).catch(er=>{

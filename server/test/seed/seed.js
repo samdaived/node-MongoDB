@@ -3,21 +3,25 @@ const {todo}=require('../../models/todo');
 const {User}=require('../../models/user');
  const jwt = require('jsonwebtoken');
 
+const userOneId=new ObjectID();
+const userTwoId=new ObjectID();
+
 var initialToDoData = [
     {text:'trying',
     _id:new ObjectID(),
+    _creator:userOneId,
     complated:false,
     complatedAt:null}
     ,
     {text:'trying aging',
     _id:new ObjectID(),
+    _creator:userTwoId,
     complated:true,
     complatedAt:234
     }
 ];
 
-const userOneId=new ObjectID();
-const userTwoId=new ObjectID();
+
 const initialUserData=[{
         _id:userOneId,
         email:"sam@sds.cdf",

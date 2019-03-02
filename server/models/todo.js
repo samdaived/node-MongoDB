@@ -15,7 +15,11 @@ const todo =mongoose.model("todo",{
     complatedAt:{
         type:Number,
         default:null
-    }
+    },
+    _creator:{
+        required:true,
+        type:mongoose.Schema.Types.ObjectId
+        }
 });
 
 
