@@ -1,6 +1,7 @@
-# node-MongoDB
+# Node-MongoDB
 ToDo-App
 
+# First set you mongo data base 
 
 # npm install
 
@@ -30,6 +31,6 @@ http://localhost:3000
 
 * post /users/me/token : to logout and remove the token
 
-# the data should be organized in specific way *Check serve/model for more details 
+# The data should be organized in specific way *Check serve/model for more details 
 
   
